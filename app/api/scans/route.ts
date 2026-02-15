@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { POST as runScanPost } from './run/route';
 
 export async function GET() {
     try {
@@ -22,4 +23,8 @@ export async function GET() {
             { status: 500 }
         );
     }
+}
+
+export async function POST(request: Request) {
+    return runScanPost(request);
 }

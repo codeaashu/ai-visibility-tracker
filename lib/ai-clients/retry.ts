@@ -21,7 +21,7 @@ function extractRetryDelayMs(error: AIProviderError, fallbackMs: number): number
 }
 
 export async function withProviderRetry<T>(
-    provider: 'gemini' | 'openai',
+    provider: 'gemini' | 'openai' | 'perplexity',
     operation: () => Promise<T>,
     maxAttempts = 3,
     baseDelayMs = 1500

@@ -9,14 +9,14 @@ export type ProviderErrorType =
     | 'unknown';
 
 export class AIProviderError extends Error {
-    provider: 'gemini' | 'openai';
+    provider: 'gemini' | 'openai' | 'perplexity';
     type: ProviderErrorType;
     statusCode?: number;
     providerCode?: string;
     retryable: boolean;
 
     constructor(params: {
-        provider: 'gemini' | 'openai';
+        provider: 'gemini' | 'openai' | 'perplexity';
         type: ProviderErrorType;
         message: string;
         statusCode?: number;
@@ -75,7 +75,7 @@ function isRetryable(type: ProviderErrorType): boolean {
     return type === 'rate_limit' || type === 'server' || type === 'network';
 }
 
-export function toProviderError(provider: 'gemini' | 'openai', error: unknown): AIProviderError {
+export function toProviderError(provider: 'gemini' | 'openai' | 'perplexity', error: unknown): AIProviderError {
     if (error instanceof AIProviderError) {
         return error;
     }

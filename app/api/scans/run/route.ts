@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { queryGemini } from '@/lib/ai-clients/gemini';
 import { queryChatGPT } from '@/lib/ai-clients/openai';
+import { queryPerplexity } from '@/lib/ai-clients/perplexity';
 import { withProviderRetry } from '@/lib/ai-clients/retry';
 import { detectBrandMentions } from '@/lib/brand-detector';
 
-type ScanPlatform = 'gemini' | 'chatgpt';
+type ScanPlatform = 'gemini' | 'chatgpt' | 'perplexity';
 
 type ScanResult = {
     platform: string;
@@ -17,8 +18,13 @@ type ScanResult = {
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
-        const { query_id, platforms, openai_api_key } = body;
+        const body = await request.json() as {
+            query_id?: string;
+            platforms?: string[];
+            openai_api_key?: string;
+            perplexity_api_key?: string;
+        };
+        const { query_id, platforms, openai_api_key, perplexity_api_key } = body;
 
         if (!query_id || !platforms || platforms.length === 0) {
             return NextResponse.json(
@@ -55,7 +61,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const supportedPlatforms: ScanPlatform[] = ['gemini', 'chatgpt'];
+        const supportedPlatforms: ScanPlatform[] = ['gemini', 'chatgpt', 'perplexity'];
         const unsupportedPlatforms = (platforms as string[]).filter(
             (platform) => !supportedPlatforms.includes(platform as ScanPlatform)
         );
@@ -77,6 +83,8 @@ export async function POST(request: Request) {
                         response = await withProviderRetry('gemini', () => queryGemini(query.text));
                     } else if (platform === 'chatgpt') {
                         response = await withProviderRetry('openai', () => queryChatGPT(query.text, openai_api_key));
+                    } else if (platform === 'perplexity') {
+                        response = await withProviderRetry('perplexity', () => queryPerplexity(query.text, perplexity_api_key));
                     }
 
                     // Save scan
