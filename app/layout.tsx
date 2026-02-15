@@ -34,6 +34,12 @@ export default function RootLayout({
                     href="/"
                     className="text-slate-700 hover:text-indigo-600 font-medium transition-colors"
                   >
+                    Home
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="text-slate-700 hover:text-indigo-600 font-medium transition-colors"
+                  >
                     Dashboard
                   </Link>
                   <Link
@@ -41,6 +47,12 @@ export default function RootLayout({
                     className="text-slate-700 hover:text-indigo-600 font-medium transition-colors"
                   >
                     Brands
+                  </Link>
+                  <Link
+                    href="/query-library"
+                    className="text-slate-700 hover:text-indigo-600 font-medium transition-colors"
+                  >
+                    Query Library
                   </Link>
                   <Link
                     href="/scans"

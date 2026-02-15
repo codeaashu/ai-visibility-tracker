@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Brand, VisibilityMetrics } from '@/lib/types';
 import { TrendingUp, Target, Activity, Sparkles } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Link from 'next/link';
 
 const COLORS = ['#6366f1', '#3b82f6', '#06b6d4', '#8b5cf6'];

@@ -21,6 +21,7 @@ export default function ScansPage() {
     const [selectedQuery, setSelectedQuery] = useState('');
     const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['gemini']);
     const [openaiKey, setOpenaiKey] = useState('');
+    const [perplexityKey, setPerplexityKey] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -51,20 +52,16 @@ export default function ScansPage() {
             return;
         }
 
-        if (selectedPlatforms.includes('chatgpt') && !openaiKey) {
-            alert('Please provide your OpenAI API key to use ChatGPT');
-            return;
-        }
-
         setScanning(true);
         try {
-            const res = await fetch('/api/scans/run', {
+            const res = await fetch('/api/scans', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     query_id: selectedQuery,
                     platforms: selectedPlatforms,
                     openai_api_key: openaiKey || undefined,
+                    perplexity_api_key: perplexityKey || undefined,
                 }),
             });
 
@@ -166,6 +163,15 @@ export default function ScansPage() {
                             >
                                 ChatGPT
                             </button>
+                            <button
+                                onClick={() => togglePlatform('perplexity')}
+                                className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedPlatforms.includes('perplexity')
+                                        ? 'bg-white text-indigo-600'
+                                        : 'bg-white/20 hover:bg-white/30'
+                                    }`}
+                            >
+                                Perplexity
+                            </button>
                         </div>
                     </div>
 
@@ -183,6 +189,19 @@ export default function ScansPage() {
                             <p className="text-xs mt-2 opacity-90">
                                 Your API key is only used for this scan and is not stored.
                             </p>
+                        </div>
+                    )}
+
+                    {selectedPlatforms.includes('perplexity') && (
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Perplexity API Key (optional if env configured)</label>
+                            <input
+                                type="password"
+                                value={perplexityKey}
+                                onChange={(e) => setPerplexityKey(e.target.value)}
+                                className="w-full px-4 py-3 rounded-lg text-slate-900 focus:ring-2 focus:ring-white"
+                                placeholder="pplx-..."
+                            />
                         </div>
                     )}
 

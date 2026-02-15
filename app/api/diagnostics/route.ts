@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { queryGemini } from '@/lib/ai-clients/gemini';
 import { queryChatGPT } from '@/lib/ai-clients/openai';
+import { queryPerplexity } from '@/lib/ai-clients/perplexity';
 import { AIProviderError, providerFixHint, toProviderError } from '@/lib/ai-clients/errors';
 
 type CheckStatus = 'ok' | 'warning' | 'error' | 'skipped';
@@ -49,6 +50,7 @@ export async function GET(request: Request) {
         SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
         GEMINI_API_KEY: process.env.GEMINI_API_KEY,
         OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        PERPLEXITY_API_KEY: process.env.PERPLEXITY_API_KEY,
     };
 
     const requiredEnvVars: Array<keyof typeof env> = [
@@ -79,6 +81,14 @@ export async function GET(request: Request) {
         status: env.OPENAI_API_KEY ? 'ok' : 'warning',
         message: env.OPENAI_API_KEY
             ? 'Configured (optional for ChatGPT scans)'
+            : 'Not configured (optional; users can still provide key per scan)',
+    });
+
+    checks.push({
+        name: 'env:PERPLEXITY_API_KEY',
+        status: env.PERPLEXITY_API_KEY ? 'ok' : 'warning',
+        message: env.PERPLEXITY_API_KEY
+            ? 'Configured (optional for Perplexity scans)'
             : 'Not configured (optional; users can still provide key per scan)',
     });
 
@@ -147,6 +157,36 @@ export async function GET(request: Request) {
                 checks.push(toDiagnosticProviderCheck('provider:openai', error));
             }
         }
+
+        if (!env.PERPLEXITY_API_KEY) {
+            checks.push({
+                name: 'provider:perplexity',
+                status: 'warning',
+                message: 'Skipping Perplexity provider test (optional API key missing)',
+            });
+        } else {
+            try {
+                await queryPerplexity('Reply with exactly: OK');
+                checks.push({
+                    name: 'provider:perplexity',
+                    status: 'ok',
+                    message: 'Perplexity provider test succeeded',
+                });
+            } catch (error) {
+                const providerError = toProviderError('perplexity', error);
+                checks.push({
+                    name: 'provider:perplexity',
+                    status: 'error',
+                    message: providerError.message,
+                    details: {
+                        type: providerError.type,
+                        statusCode: providerError.statusCode,
+                        retryable: providerError.retryable,
+                        hint: providerFixHint(providerError),
+                    },
+                });
+            }
+        }
     } else {
         checks.push({
             name: 'provider:gemini',
@@ -155,6 +195,11 @@ export async function GET(request: Request) {
         });
         checks.push({
             name: 'provider:openai',
+            status: 'skipped',
+            message: 'Provider call test skipped. Use ?test_providers=true to test live API access.',
+        });
+        checks.push({
+            name: 'provider:perplexity',
             status: 'skipped',
             message: 'Provider call test skipped. Use ?test_providers=true to test live API access.',
         });
