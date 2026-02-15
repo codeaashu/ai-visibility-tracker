@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { queryGemini } from '@/lib/ai-clients/gemini';
+import { withProviderRetry } from '@/lib/ai-clients/retry';
 import { detectBrandMentions } from '@/lib/brand-detector';
 
 export async function GET() {
@@ -31,7 +32,7 @@ export async function GET() {
 
         for (const query of queries) {
             try {
-                const response = await queryGemini(query.text);
+                const response = await withProviderRetry('gemini', () => queryGemini(query.text));
 
                 const { data: scan, error: scanError } = await supabase
                     .from('scans')

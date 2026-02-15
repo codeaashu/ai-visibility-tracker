@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { queryGemini } from '@/lib/ai-clients/gemini';
 import { queryChatGPT } from '@/lib/ai-clients/openai';
+import { withProviderRetry } from '@/lib/ai-clients/retry';
 import { detectBrandMentions } from '@/lib/brand-detector';
 
 type ScanPlatform = 'gemini' | 'chatgpt';
@@ -73,9 +74,9 @@ export async function POST(request: Request) {
                     let response = '';
 
                     if (platform === 'gemini') {
-                        response = await queryGemini(query.text);
+                        response = await withProviderRetry('gemini', () => queryGemini(query.text));
                     } else if (platform === 'chatgpt') {
-                        response = await queryChatGPT(query.text, openai_api_key);
+                        response = await withProviderRetry('openai', () => queryChatGPT(query.text, openai_api_key));
                     }
 
                     // Save scan

@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { toProviderError } from './errors';
 
 export async function queryChatGPT(prompt: string, apiKey?: string): Promise<string> {
     try {
@@ -21,6 +22,6 @@ export async function queryChatGPT(prompt: string, apiKey?: string): Promise<str
         return completion.choices[0]?.message?.content || '';
     } catch (error) {
         console.error('OpenAI API error:', error);
-        throw new Error('Failed to query ChatGPT API');
+        throw toProviderError('openai', error);
     }
 }

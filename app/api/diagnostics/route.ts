@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { queryGemini } from '@/lib/ai-clients/gemini';
 import { queryChatGPT } from '@/lib/ai-clients/openai';
+import { AIProviderError, providerFixHint, toProviderError } from '@/lib/ai-clients/errors';
 
 type CheckStatus = 'ok' | 'warning' | 'error' | 'skipped';
 
@@ -9,7 +10,32 @@ type DiagnosticCheck = {
     name: string;
     status: CheckStatus;
     message: string;
+    details?: {
+        type?: string;
+        statusCode?: number;
+        retryable?: boolean;
+        hint?: string;
+    };
 };
+
+function toDiagnosticProviderCheck(name: string, error: unknown): DiagnosticCheck {
+    const providerError: AIProviderError = toProviderError(
+        name === 'provider:gemini' ? 'gemini' : 'openai',
+        error
+    );
+
+    return {
+        name,
+        status: 'error',
+        message: providerError.message,
+        details: {
+            type: providerError.type,
+            statusCode: providerError.statusCode,
+            retryable: providerError.retryable,
+            hint: providerFixHint(providerError),
+        },
+    };
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -99,11 +125,7 @@ export async function GET(request: Request) {
                     message: 'Gemini provider test succeeded',
                 });
             } catch (error) {
-                checks.push({
-                    name: 'provider:gemini',
-                    status: 'error',
-                    message: error instanceof Error ? error.message : 'Gemini test failed',
-                });
+                checks.push(toDiagnosticProviderCheck('provider:gemini', error));
             }
         }
 
@@ -122,11 +144,7 @@ export async function GET(request: Request) {
                     message: 'OpenAI provider test succeeded',
                 });
             } catch (error) {
-                checks.push({
-                    name: 'provider:openai',
-                    status: 'error',
-                    message: error instanceof Error ? error.message : 'OpenAI test failed',
-                });
+                checks.push(toDiagnosticProviderCheck('provider:openai', error));
             }
         }
     } else {
