@@ -36,20 +36,25 @@ export class AIProviderError extends Error {
 function classifyType(statusCode?: number, rawMessage?: string): ProviderErrorType {
     const message = (rawMessage || '').toLowerCase();
 
+    const hasQuotaSignal =
+        message.includes('quota') ||
+        message.includes('insufficient_quota') ||
+        message.includes('quota exceeded') ||
+        message.includes('limit: 0') ||
+        message.includes('free_tier') ||
+        message.includes('exceeded your current quota');
+
     if (statusCode === 401 || statusCode === 403 || message.includes('api key') || message.includes('unauthorized')) {
         return 'auth';
+    }
+    if (hasQuotaSignal) {
+        return 'quota';
     }
     if (statusCode === 429) {
         if (message.includes('rate limit') || message.includes('too many requests')) {
             return 'rate_limit';
         }
-        if (message.includes('quota') || message.includes('insufficient_quota')) {
-            return 'quota';
-        }
         return 'rate_limit';
-    }
-    if (message.includes('quota') || message.includes('insufficient_quota')) {
-        return 'quota';
     }
     if (message.includes('billing') || message.includes('payment') || message.includes('credit')) {
         return 'billing';
@@ -108,7 +113,7 @@ export function providerFixHint(error: AIProviderError): string {
         case 'auth':
             return 'Check API key validity, project permissions, and whether the key is loaded in env.';
         case 'quota':
-            return 'Check provider quota/usage limits and request a quota increase or reduce usage.';
+            return 'Quota is exhausted or disabled. Enable billing/increase quota or switch provider/model.';
         case 'rate_limit':
             return 'You are being rate-limited. Add retry/backoff or lower request frequency.';
         case 'billing':
