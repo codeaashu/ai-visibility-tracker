@@ -5,6 +5,14 @@ import { Query, ScanWithQuery } from '@/lib/types';
 import { Play, Clock, CheckCircle, XCircle, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
+type ScanResult = {
+    platform: string;
+    success: boolean;
+    error?: string;
+    scan_id?: string;
+    mentions_count?: number;
+};
+
 export default function ScansPage() {
     const [queries, setQueries] = useState<Query[]>([]);
     const [scans, setScans] = useState<ScanWithQuery[]>([]);
@@ -63,7 +71,18 @@ export default function ScansPage() {
             const data = await res.json();
 
             if (res.ok) {
-                alert(`Scan completed! Found mentions in ${data.results.filter((r: any) => r.success).length} platforms.`);
+                const results: ScanResult[] = data.results || [];
+                const successCount = results.filter((result) => result.success).length;
+
+                if (successCount === 0) {
+                    const firstError = results.find((result) => result.error)?.error;
+                    alert(`Scan failed on all platforms.${firstError ? ` ${firstError}` : ''}`);
+                } else if (successCount < results.length) {
+                    alert(`Scan partially completed: ${successCount}/${results.length} platforms succeeded.`);
+                } else {
+                    alert(`Scan completed successfully on ${successCount} platform(s).`);
+                }
+
                 fetchData();
             } else {
                 alert(`Error: ${data.error}`);

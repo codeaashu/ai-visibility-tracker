@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Brand, Query, VisibilityMetrics } from '@/lib/types';
+import { Brand, VisibilityMetrics } from '@/lib/types';
 import { TrendingUp, Target, Activity, Sparkles } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Link from 'next/link';
@@ -9,7 +9,6 @@ import Link from 'next/link';
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<VisibilityMetrics | null>(null);
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [queries, setQueries] = useState<Query[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,19 +17,16 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      const [metricsRes, brandsRes, queriesRes] = await Promise.all([
+      const [metricsRes, brandsRes] = await Promise.all([
         fetch('/api/analytics'),
         fetch('/api/brands'),
-        fetch('/api/queries'),
       ]);
 
       const metricsData = await metricsRes.json();
       const brandsData = await brandsRes.json();
-      const queriesData = await queriesRes.json();
 
       setMetrics(metricsData);
       setBrands(brandsData.brands || []);
-      setQueries(queriesData.queries || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

@@ -4,6 +4,16 @@ import { queryGemini } from '@/lib/ai-clients/gemini';
 import { queryChatGPT } from '@/lib/ai-clients/openai';
 import { detectBrandMentions } from '@/lib/brand-detector';
 
+type ScanPlatform = 'gemini' | 'chatgpt';
+
+type ScanResult = {
+    platform: string;
+    success: boolean;
+    scan_id?: string;
+    mentions_count?: number;
+    error?: string;
+};
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -44,9 +54,21 @@ export async function POST(request: Request) {
             );
         }
 
+        const supportedPlatforms: ScanPlatform[] = ['gemini', 'chatgpt'];
+        const unsupportedPlatforms = (platforms as string[]).filter(
+            (platform) => !supportedPlatforms.includes(platform as ScanPlatform)
+        );
+
+        if (unsupportedPlatforms.length > 0) {
+            return NextResponse.json(
+                { error: `Unsupported platform(s): ${unsupportedPlatforms.join(', ')}` },
+                { status: 400 }
+            );
+        }
+
         // Query each AI platform
         const scanResults = await Promise.all(
-            platforms.map(async (platform: string) => {
+            (platforms as ScanPlatform[]).map(async (platform): Promise<ScanResult> => {
                 try {
                     let response = '';
 
@@ -104,11 +126,20 @@ export async function POST(request: Request) {
             })
         );
 
-        return NextResponse.json({
-            success: true,
+        const successCount = scanResults.filter((result) => result.success).length;
+        const hasAnySuccess = successCount > 0;
+
+        const payload = {
+            success: hasAnySuccess,
             query: query.text,
             results: scanResults,
-        });
+        };
+
+        if (!hasAnySuccess) {
+            return NextResponse.json(payload, { status: 502 });
+        }
+
+        return NextResponse.json(payload);
     } catch (error) {
         console.error('Error running scan:', error);
         return NextResponse.json(

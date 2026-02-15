@@ -48,6 +48,12 @@ export default function RootLayout({
                   >
                     Scans
                   </Link>
+                  <Link
+                    href="/analytics"
+                    className="text-slate-700 hover:text-indigo-600 font-medium transition-colors"
+                  >
+                    Analytics
+                  </Link>
                 </div>
               </div>
             </div>
