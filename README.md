@@ -1,270 +1,143 @@
-# AI Visibility Tracker
+# AiCMO - open-source AI SEO tool (GEO/AIO)
 
-Track how your SaaS product appears in AI recommendations from ChatGPT, Gemini, and other AI assistants.
+AiCMO is an open-source AI SEO (search optimization) platform that helps companies monitor and optimize their brand visibility in AI tools like ChatGPT, Gemini/Google, Perplexity, Claude, etc. 
+Track how often your brand appears in AI responses, analyze competitor performance, and get actionable recommendations to improve your presence in conversational AI search results.
 
-![AI Visibility Tracker](https://img.shields.io/badge/Next.js-14-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8)
+## ✨ Core Features
 
-## 🎯 What is This?
+- **Real-time Brand Monitoring**: Track brand mentions and citations across major AI platforms
+- **Competitive Intelligence**: Analyze share of voice and benchmark against competitors
+- **Authority Tracking**: Identify which sources AI models cite most frequently in your domain
+- **Actionable Insights**: Get AI-powered recommendations to improve brand visibility
+- **Multi-Model Support**: Monitor performance across ChatGPT, Gemini, and other AI platforms
+- **Self-Hosted Option**: Deploy on your infrastructure with full data control
 
-73% of SaaS brands are invisible in AI recommendations. This tool helps you:
+## 📊 Screenshots
 
-- **Track AI Visibility**: See if your product appears when users ask AI tools for recommendations
-- **Monitor Trends**: Track visibility over time across multiple AI platforms
-- **Compare Competitors**: Understand how you stack up against competitors
-- **Identify Opportunities**: Discover which queries mention your brand and which don't
+### Dashboard Overview
+Monitor your AI visibility score and website citation rate at a glance. Track share of voice metrics to see how your brand compares to competitors across AI-generated responses.
 
-## ✨ Features
+![aicmo-geo-dashboard.png](docs/images/aicmo-geo-dashboard.png)
 
-### MVP Features
-- ✅ Track multiple brands
-- ✅ Query Gemini API (free) and ChatGPT
-- ✅ Automatic brand mention detection
-- ✅ Visibility score calculation
-- ✅ Trend analysis and charts
-- ✅ Platform breakdown (Gemini, ChatGPT)
-- ✅ Scan history
-- ✅ Beautiful, modern UI
+### Prompt Monitoring
+Configure and track custom prompts relevant to your industry. Monitor which AI models (OpenAI, Gemini) mention your brand and track visibility percentages across different query types.
 
-### Tech Stack
-- **Frontend**: Next.js 14, React, TypeScript, TailwindCSS
-- **Backend**: Next.js API Routes (serverless)
-- **Database**: Supabase (PostgreSQL)
-- **AI APIs**: Google Gemini (free), OpenAI (optional)
-- **Charts**: Recharts
-- **Deployment**: Vercel (free tier)
+![aicmo-geo-prompts.png](docs/images/aicmo-geo-prompts.png)
 
-## 🚀 Quick Start
+### Detailed Analytics
+Dive deep into individual prompt performance. See exactly when and where your brand was mentioned, which websites were cited, and track the most authoritative sources in AI responses over time.
 
-### Prerequisites
-- Node.js 18+ installed
-- Supabase account (free)
-- Gemini API key (free)
-- OpenAI API key (optional)
+![aicmo-geo-prompt-details.png](docs/images/aicmo-geo-prompt-details.png)
 
-### 1. Clone and Install
 
-```bash
-cd ai-visibility-tracker
-npm install
-```
+## 📦 Deployment
 
-### 2. Set Up Supabase
+## 🧱 Architecture (important)
 
-1. Go to [supabase.com](https://supabase.com) and create a new project
-2. Go to SQL Editor and run the schema from `supabase-schema.sql`
-3. Copy your project URL and API keys from Settings > API
+- Frontend: Vue 3 + Vite (`frontend/`)
+- Backend: FastAPI (Python) (`backend/`)
+- Background jobs: Celery tasks
+- Database: SQLModel with SQLite (local default) or Postgres (recommended for deploy)
 
-### 3. Get API Keys
+This repository is **not** a Next.js backend.
 
-**Gemini API (Free)**
-1. Go to [ai.google.dev](https://ai.google.dev)
-2. Click "Get API Key"
-3. Create a new API key
+### AI CMO Cloud
 
-**OpenAI API (Optional)**
-1. Go to [platform.openai.com](https://platform.openai.com)
-2. Create an API key
-3. Or let users provide their own keys
+Managed deployment by the AI CMO team, generous free-tier, no credit card required.
 
-### 4. Configure Environment Variables
+[AI CMO Cloud](https://getaicmo.com/)
 
-Create `.env.local` file:
+### Self-hosting
 
-```bash
-cp .env.local.example .env.local
-```
+Run AiCMO on your own infrastructure. You will need a Vertex AI credentials (Service Account) file and an OpenAI API key.
 
-Edit `.env.local` and add your keys:
+1. Clone the repository
+   ```bash
+   # Clone the repository
+   git clone https://github.com/AICMO/ai-cmo.git
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_KEY=your_supabase_service_key
-GEMINI_API_KEY=your_gemini_api_key
-OPENAI_API_KEY=optional_your_openai_api_key
-```
+   # Navigate to the backend directory
+   cd ai-cmo/backend
+   ```
 
-### 5. Run Development Server
+2. Copy your Vertex AI credentials (Service Account) file to the root of the backend directory and name it `vertex_credentials.json`.
+Backend will not start without this file
 
-```bash
-npm run dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+3. Create .env.local file in the backend directory and add the following variables:
+   ```bash
+   echo AC_OPENAI_API_KEY=your_openai_api_key >> .env.local
+   ```
 
-## 📖 Usage Guide
+4. Run the following command to start the AiCMO:
+   ```bash
+   docker compose up -d
+   ```
 
-### Step 1: Add Your Brand
+5. Open http://localhost:8081 in your browser to access the AiCMO frontend.
 
-1. Navigate to **Brands** page
-2. Click **Add Brand**
-3. Enter your brand name (e.g., "MyStartup")
-4. Optionally add category and website
-5. Click **Add Brand**
+## 💸 Free deployment plan (Vercel + Supabase)
 
-### Step 2: Run a Scan
+If you want to deploy without paying for infra:
 
-1. Navigate to **Scans** page
-2. Select a query from the dropdown (e.g., "best CRM for small business")
-3. Choose AI platforms (Gemini is free, ChatGPT requires API key)
-4. Click **Run Scan**
-5. Wait for results (usually 5-10 seconds)
+- Use **Supabase Postgres** as database (`AC_DB_DSN`)
+- Deploy **frontend** as one Vercel project (root: `frontend`)
+- Deploy **backend** as another Vercel project (root: `backend`)
+- Use backend `inline` task mode (no RabbitMQ/Redis/worker service)
 
-### Step 3: View Results
+> Note: AI provider usage (OpenAI/Gemini) can still create API costs depending on your own account usage.
 
-1. Check the **Dashboard** for overall visibility metrics
-2. View **Scan History** to see individual scan results
-3. Click on a scan to see detailed mentions and AI responses
+### 1) Backend settings for free mode
 
-## 🎨 Screenshots
-
-### Dashboard
-- Visibility score and metrics
-- Trend charts
-- Platform breakdown
-- Quick actions
-
-### Brands Management
-- Add/delete brands
-- View brand details
-- Category organization
-
-### Scans
-- Run new scans
-- Select queries and platforms
-- View scan history
-- Detailed scan results
-
-## 🚢 Deployment
-
-### Deploy to Vercel (Free)
-
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Add environment variables in Vercel dashboard
-5. Deploy!
-
-Your app will be live at `https://your-app.vercel.app`
-
-### Environment Variables in Vercel
-
-Add these in Vercel dashboard under Settings > Environment Variables:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_KEY`
-- `GEMINI_API_KEY`
-- `OPENAI_API_KEY` (optional)
-
-## 💰 Cost Breakdown
-
-| Service | Free Tier | Estimated Cost |
-|---------|-----------|----------------|
-| **Vercel** | 100GB bandwidth/month | $0 |
-| **Supabase** | 500MB database | $0 |
-| **Gemini API** | 60 requests/min | $0 |
-| **OpenAI API** | Pay-per-use | $0 (user-provided keys) |
-| **Total** | | **$0/month** |
-
-## 🔧 Configuration
-
-### Adding Custom Queries
-
-You can add custom queries via the UI or directly in the database:
-
-```sql
-INSERT INTO queries (text, category, is_template) VALUES
-  ('your custom query here', 'Your Category', true);
-```
-
-### Modifying Brand Detection
-
-Edit `lib/brand-detector.ts` to customize how brands are detected in AI responses.
-
-## 📊 API Endpoints
-
-### Brands
-- `GET /api/brands` - List all brands
-- `POST /api/brands` - Create a brand
-- `DELETE /api/brands/:id` - Delete a brand
-
-### Queries
-- `GET /api/queries` - List all queries
-- `POST /api/queries` - Create custom query
-
-### Scans
-- `POST /api/scans/run` - Run a new scan
-- `GET /api/scans` - Get scan history
-- `GET /api/scans/:id` - Get scan details
-
-### Analytics
-- `GET /api/analytics?brand_id=xxx&days=30` - Get analytics data
-
-## 🛠 Development
-
-### Project Structure
-
-```
-ai-visibility-tracker/
-├── app/
-│   ├── api/              # API routes
-│   ├── brands/           # Brands page
-│   ├── scans/            # Scans pages
-│   ├── layout.tsx        # Root layout
-│   └── page.tsx          # Dashboard
-├── lib/
-│   ├── ai-clients/       # AI API wrappers
-│   ├── supabase.ts       # Database client
-│   ├── types.ts          # TypeScript types
-│   └── brand-detector.ts # Brand detection logic
-├── supabase-schema.sql   # Database schema
-└── .env.local.example    # Environment template
-```
-
-### Running Tests
+Set these environment variables in the backend Vercel project:
 
 ```bash
-npm run build
-npm run lint
+AC_DB_DSN=postgresql+psycopg://USER:PASSWORD@HOST:5432/postgres?sslmode=require
+AC_OPENAI_API_KEY=your_openai_key
+AC_TASK_MODE=inline
+AC_FRONTEND_URL=https://YOUR_FRONTEND_DOMAIN.vercel.app
+AC_CORS_ORIGINS=https://YOUR_FRONTEND_DOMAIN.vercel.app
+
+# Use OpenAI for generation/crawl prompts (no Vertex credentials required)
+AC_SEMI_SMART_PROVIDER=openai
+AC_SEMI_SMART_MODEL=gpt-4o-mini
+AC_SMART_PROVIDER=openai
+AC_SMART_MODEL=gpt-4o
 ```
 
-## 🤝 Contributing
+Optional cron protection:
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+AC_CRON_SECRET=some-long-random-string
+CRON_SECRET=some-long-random-string
+```
 
-## 📝 License
+### 2) Database migrations (one-time)
 
-MIT License - feel free to use this for your own projects!
+Run once against Supabase DB from your machine:
 
-## 🙋 FAQ
+```bash
+cd backend
+uv run alembic upgrade head
+```
 
-### Q: Can I use this for free?
-**A:** Yes! Using Vercel, Supabase, and Gemini API, you can run this completely free.
+### 3) Frontend settings for deployed backend
 
-### Q: Do I need an OpenAI API key?
-**A:** No, Gemini API is free and works great. OpenAI is optional for ChatGPT comparisons.
+Set this env var in the frontend Vercel project:
 
-### Q: How accurate is brand detection?
-**A:** The current implementation uses regex and fuzzy matching (~90% accurate). You can improve it with NLP libraries.
+```bash
+AC_API_BASE_URL=https://YOUR_BACKEND_DOMAIN.vercel.app
+```
 
-### Q: Can I track competitors?
-**A:** Yes! Add competitor brands and they'll be tracked in the same scans.
+### 4) Prompt monitoring schedule
 
-### Q: How often should I run scans?
-**A:** Weekly or monthly is usually sufficient to track trends.
+`backend/vercel.json` already defines a cron job that calls:
 
-## 🔗 Resources
+- `GET /api/v1/prompts/scheduled/trigger`
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Supabase Documentation](https://supabase.com/docs)
-- [Gemini API Documentation](https://ai.google.dev/docs)
-- [Vercel Deployment Guide](https://vercel.com/docs)
+If `AC_CRON_SECRET` is set, the endpoint accepts one of:
 
-## 📧 Support
+- `Authorization: Bearer <secret>`
+- `X-CRON-SECRET: <secret>`
+- `?token=<secret>`
 
-For issues or questions, please open an issue on GitHub.
-
----
-
-Built with ❤️ using Next.js, Supabase, and AI APIs

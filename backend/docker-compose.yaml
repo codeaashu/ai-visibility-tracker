@@ -1,0 +1,97 @@
+services:
+  postgres:
+    image: postgres:17.5-alpine
+    restart: unless-stopped
+    container_name: ac_postgres
+    env_file:
+      - .env.docker
+    ports:
+      - 5432:5432
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    environment:
+      PGDATA: /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
+  valkey:
+    image: valkey/valkey:8.1-bookworm
+    restart: unless-stopped
+    container_name: ac_valkey
+    ports:
+      - 6379:6379
+    volumes:
+      - ./.data/valkey:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    container_name: ac_rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./.data/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 72000000
+  
+  frontend:
+    image: ac-frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    container_name: ac_frontend
+    ports:
+      - 8081:80
+      - 443:443
+  backend: &backend
+    image: ac-backend
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    container_name: ac_backend
+    user: "999:999"
+    volumes:
+      - ./vertex_credentials.json:/app/vertex_credentials.json
+      - ./app:/app/app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+        restart: true
+      postgres:
+        condition: service_healthy
+        restart: true
+      valkey:
+        condition: service_healthy
+        restart: true
+    env_file:
+      - path: .env
+        required: true
+      - path: .env.docker
+        required: true
+      - path: .env.local
+        required: false
+  celery:
+    <<: *backend
+    image: ac-backend
+    container_name: ac_celery
+    command: celery -A app.worker.worker worker --loglevel=info -Q crawl,prompt_watch,scheduled --concurrency=4 -n worker.%n
+  celery_beat:
+    <<: *backend
+    image: ac-backend
+    container_name: ac_celery_beat
+    command: celery -A app.worker.celery_app beat -l info --schedule=/tmp/celery-beat-schedule

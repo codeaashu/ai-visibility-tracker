@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17.5-alpine
+    restart: unless-stopped
+    container_name: ac_postgres
+    env_file:
+      - .env
+    ports:
+      - 5432:5432
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    environment:
+      PGDATA: /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 3s
+  valkey:
+    image: valkey/valkey:8.1-bookworm
+    restart: unless-stopped
+    container_name: ac_valkey
+    ports:
+      - 6379:6379
+    volumes:
+      - ./.data/valkey:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    container_name: ac_rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./.data/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit consumer_timeout 72000000
+  
