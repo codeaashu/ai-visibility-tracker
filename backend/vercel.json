@@ -15,7 +15,7 @@
   "crons": [
     {
       "path": "/api/v1/prompts/scheduled/trigger",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
