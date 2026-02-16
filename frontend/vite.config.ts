@@ -7,7 +7,7 @@ import svgLoader from 'vite-svg-loader'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'AC_')
-  const licenseType = env.AC_LICENSE_TYPE
+  const licenseType = env.AC_LICENSE_TYPE === 'ee' ? 'ee' : 'ce'
   return {
     plugins: [vue(), tailwindcss(), svgLoader()],
     resolve: {
