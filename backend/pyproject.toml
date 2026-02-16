@@ -8,16 +8,13 @@ dependencies = [
     "alembic>=1.15.2",
     "celery>=5.5.1",
     "fastapi>=0.115.12",
-    "google-cloud-aiplatform>=1.86.0",
-    "google-genai>=1.20.0",
     "litellm<=1.76.0",
+    "openai>=1.99.0",
     "psycopg[binary]>=3.2.6",
     "pydantic-extra-types>=2.10.3",
     "pydantic-settings>=2.8.1",
-    "redis>=5.2.1",
     "sqlmodel>=0.0.24",
     "uvicorn>=0.34.2",
-    "valkey[libvalkey]>=6.1.0",
 ]
 
 [tool.uv]

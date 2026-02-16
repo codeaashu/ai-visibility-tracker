@@ -1,1 +1,6 @@
 uv.lock
+app/tests/
+.data/
+docker-compose.yaml
+docker-compose.services.yaml
+vertex_credentials.json
