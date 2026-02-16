@@ -6,14 +6,14 @@ export const router = createRouter({
     routes: [
         {
             path: '/',
+            name: 'landing',
+            component: () => import('@/views/LandingView.vue')
+        },
+        {
+            path: '/',
             name: 'home',
             component: () => import('@/views/HomeLayout.vue'),
             children: [
-                {
-                    path: '',
-                    name: 'home-landing',
-                    component: () => import('@/views/CompaniesView.vue')
-                },
                 {
                     path: 'companies',
                     name: 'companies',
