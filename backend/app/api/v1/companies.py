@@ -1,4 +1,5 @@
 from typing import Annotated
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -28,6 +29,7 @@ from app.models.types import default_now
 from app.worker.task_dispatcher import dispatch_task
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _start_company_crawl(company_id: int):
@@ -64,7 +66,10 @@ def create_company(
     assert company.id is not None
     company_id = company.id
     db.commit()
-    _start_company_crawl(company_id)
+    try:
+        _start_company_crawl(company_id)
+    except Exception:
+        logger.exception("Failed to start crawl for company_id=%s", company_id)
     company_db = get_company_by_id(db, company_id)
     assert company_db is not None
     return company_db
@@ -85,7 +90,10 @@ def recrawl_company(
         raw_response="",
     )
     save_company_crawl(db, crawl)
-    _start_company_crawl(company_id)
+    try:
+        _start_company_crawl(company_id)
+    except Exception:
+        logger.exception("Failed to recrawl company_id=%s", company_id)
     return company
 
 
